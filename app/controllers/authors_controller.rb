@@ -2,9 +2,9 @@
 class AuthorsController < ApplicationController
 
   def index
-    @authors = Author.all.order('name ASC')
+    @authors = Author.includes(:books).order('name ASC')
 
-    render json: @authors
+    render json: @authors.to_json(include: [:books])
   end
 
   def create
