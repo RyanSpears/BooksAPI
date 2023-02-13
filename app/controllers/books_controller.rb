@@ -1,8 +1,9 @@
-class BooksController < ApplicationController
+# frozen_string_literal: true
 
+class BooksController < ApplicationController
   def index
-    @books = Book.all.order('title ASC')
-      render json: @books
+    @books = Book.includes(:author).order('title ASC')
+    render json: @books.to_json(include: [:author])
   end
 
   def create
@@ -14,13 +15,14 @@ class BooksController < ApplicationController
   def show
     @book = Book.find(params[:id])
 
-    if stale?(last_modified: @book.updated_at)
-      render json: @book
-    end
+    return unless stale?(last_modified: @book.updated_at)
+
+    render json: @book
   end
 
   private
-    def book_params
-      params.requires(:book).permit(:title, :pages, :publisher, :year, :description)
-    end
+
+  def book_params
+    params.requires(:book).permit(:title, :pages, :publisher, :year, :description)
+  end
 end
